@@ -1,19 +1,697 @@
-* {
+/* ==========================================================================
+   Letters to the Sea - Design System & Atmosphere Styles
+   Echoing vintage seaside postcards, tactile stationery, and sunlit tides.
+   ========================================================================== */
+
+:root {
+  --color-canvas-bg: #d7e4ea;
+  --color-paper: #fbf9f4;
+  --color-paper-shadow: rgba(30, 48, 64, 0.16);
+  --color-ink-primary: #1e354a;
+  --color-ink-faded: #4d687c;
+  --color-envelope: #7ca6c4;
+  --color-envelope-dark: #5b87a7;
+  --color-postmark: #2c4d75;
+  --color-gold-sparkle: #fffae8;
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-display: 'Italiana', serif;
+  --font-handwriting: 'Caveat', cursive;
+  --font-body: 'Lora', serif;
+  --font-mono: 'DM Mono', monospace;
+}
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
+html,
 body {
-  background-color: #0b0d1b;
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  font-family: var(--font-body);
+  color: var(--color-ink-primary);
+  background-color: var(--color-canvas-bg);
+  position: relative;
+  -webkit-font-smoothing: antialiased;
 }
 
-canvas {
+/* Film Grain Texture */
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 99;
+  opacity: 0.055;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Dynamic Interactive Ocean Canvas */
+.ocean-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
   display: block;
 }
 
+/* Top Navigation */
+.top-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 24px 36px;
+  pointer-events: none;
+}
+
+/* Clean Audio Pill Button */
+.audio-toggle-container {
+  pointer-events: auto;
+}
+
+.pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  border-radius: 999px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(251, 249, 244, 0.75);
+  backdrop-filter: blur(10px);
+  padding: 8px 18px;
+  color: var(--color-ink-primary);
+  box-shadow: 0 4px 15px rgba(30, 53, 74, 0.08);
+}
+
+.pill-btn:hover {
+  background: rgba(255, 255, 255, 0.95);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(30, 53, 74, 0.12);
+}
+
+.sound-btn .sound-icon {
+  width: 17px;
+  height: 17px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Ephemera & Doodles removed to keep layout clean, minimal and serene */
+
+/* Scene Container */
+.scene-container {
+  position: relative;
+  z-index: 5;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 80px 20px 40px;
+  perspective: 1200px;
+}
+
+/* ==========================================================================
+   Letter Paper & Writing Interface (Inspo 0, 1, 4)
+   ========================================================================== */
+
+.writing-desk {
+  width: 100%;
+  max-width: 640px;
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.writing-desk.folding-out {
+  opacity: 0;
+  transform: scale(0.85) translateY(40px);
+  pointer-events: none;
+}
+
+.letter-card {
+  position: relative;
+  background: var(--color-paper);
+  border-radius: 4px;
+  padding: 44px 52px;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.03),
+    0 10px 35px var(--color-paper-shadow),
+    0 25px 50px -12px rgba(26, 42, 58, 0.22);
+  border: 1px solid rgba(220, 215, 203, 0.6);
+  transition: box-shadow 0.4s ease;
+}
+
+/* Subtle Cardstock Header */
+.letter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 18px;
+  border-bottom: 1px dashed rgba(60, 90, 120, 0.22);
+}
+
+.letter-whisper-title .main-heading {
+  font-family: var(--font-display);
+  font-size: 2.3rem;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  color: var(--color-ink-primary);
+  line-height: 1.1;
+}
+
+/* Authentic Anchor Wax Stamp Seal */
+.anchor-wax-seal-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.anchor-wax-stamp-img {
+  width: 96px;
+  height: auto;
+  filter: drop-shadow(0 8px 16px rgba(20, 40, 65, 0.32));
+  transform: rotate(-3deg);
+  transition: transform 0.3s ease;
+  user-select: none;
+}
+
+.anchor-wax-stamp-img:hover {
+  transform: rotate(0deg) scale(1.08);
+}
+
+/* Writing Form Elements */
+.letter-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.to-field-group {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  border-bottom: 1px solid rgba(60, 90, 120, 0.15);
+  padding-bottom: 6px;
+}
+
+.field-label {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-style: italic;
+  color: var(--color-ink-faded);
+  min-width: 32px;
+}
+
+.handwritten-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: var(--font-handwriting);
+  font-size: 1.55rem;
+  color: var(--color-ink-primary);
+  line-height: 1.2;
+}
+
+.handwritten-input::placeholder {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.05rem;
+  color: rgba(90, 115, 135, 0.55);
+}
+
+/* Message Textarea with Nostalgic Ruled Feeling */
+.message-field-group {
+  position: relative;
+  margin: 6px 0;
+}
+
+.handwritten-textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: var(--font-handwriting);
+  font-size: 1.65rem;
+  line-height: 2.15rem;
+  color: var(--color-ink-primary);
+  min-height: 220px;
+  position: relative;
+  z-index: 2;
+  background-attachment: local;
+  background-image: repeating-linear-gradient(transparent,
+      transparent 2.05rem,
+      rgba(140, 170, 190, 0.22) 2.15rem);
+  padding: 4px 0;
+}
+
+.handwritten-textarea::placeholder {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.15rem;
+  line-height: 1.9rem;
+  color: rgba(90, 115, 135, 0.55);
+}
+
+/* Sign-off Group */
+.signoff-group {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  align-self: flex-end;
+  max-width: 320px;
+  width: 100%;
+  border-bottom: 1px solid rgba(60, 90, 120, 0.15);
+  padding-bottom: 6px;
+  margin-top: 10px;
+}
+
+.signoff-select {
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-style: italic;
+  color: var(--color-ink-faded);
+  cursor: pointer;
+}
+
+.sender-input {
+  text-align: right;
+}
+
+/* Letter Footer & Button */
+.letter-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 36px;
+  padding-top: 16px;
+}
+
+.word-counter {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: rgba(90, 115, 135, 0.7);
+  text-transform: uppercase;
+}
+
+.send-ocean-btn {
+  background: var(--color-envelope);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  color: #ffffff;
+  padding: 12px 28px;
+  border-radius: 999px;
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 18px rgba(78, 120, 150, 0.35);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.send-ocean-btn:hover {
+  background: var(--color-envelope-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(60, 98, 125, 0.45);
+}
+
+.send-ocean-btn .btn-wave-symbol {
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+/* ==========================================================================
+   Envelope Fold & Sea Drift Animation (Inspo 4 & 5)
+   ========================================================================== */
+
+.drifting-envelope {
+  position: fixed;
+  z-index: 30;
+  width: 280px;
+  height: 180px;
+  pointer-events: none;
+  transform-origin: center center;
+  top: 50%;
+  left: 50%;
+  margin-top: -90px;
+  margin-left: -140px;
+  perspective: 1000px;
+}
+
+.envelope-outer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: #5d88a7;
+  /* Interior liner color */
+  border-radius: 4px;
+  box-shadow: 0 15px 40px rgba(15, 30, 45, 0.25);
+  overflow: visible;
+}
+
+/* Front bottom and side flaps forming the pocket */
+.envelope-pocket {
+  position: absolute;
+  inset: 0;
+  border-bottom: 95px solid #6b95b4;
+  border-left: 140px solid #759ebd;
+  border-right: 140px solid #759ebd;
+  border-top: 85px solid transparent;
+  border-radius: 4px;
+  z-index: 3;
+}
+
+/* The Top Flap:
+   A downward-pointing triangle anchored at the TOP edge (top: 0).
+   Border-top creates a triangle pointing DOWN.
+   Starts OPEN flipped UPWARD 180deg (rotateX(180deg)).
+   Closes by rotating DOWNWARD to 0deg (rotateX(0deg)), covering the pocket seamlessly with its point facing DOWN.
+*/
+.envelope-flap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  border-left: 140px solid transparent;
+  border-right: 140px solid transparent;
+  border-top: 100px solid #8cb1cd;
+  border-bottom: none;
+  transform-origin: top center;
+  transform: rotateX(180deg);
+  transition: transform 0.85s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+  backface-visibility: visible;
+}
+
+.envelope-flap.closed {
+  transform: rotateX(0deg);
+  border-top-color: #7ca6c4;
+  z-index: 4;
+}
+
+.envelope-wax-seal {
+  position: absolute;
+  top: 98px;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  width: 76px;
+  height: 76px;
+  z-index: 6;
+  transition: transform 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.envelope-seal-img {
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.4));
+}
+
+.envelope-wax-seal.sealed {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* Water ripple radiating under the floating letter */
+.envelope-water-ripple {
+  position: absolute;
+  top: 60%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100px;
+  height: 50px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Animation Stages */
+@keyframes letterFloatAway {
+  0% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+
+  25% {
+    transform: translate(25px, 20px) scale(0.85) rotate(4deg);
+    opacity: 0.95;
+  }
+
+  55% {
+    transform: translate(-40px, -45px) scale(0.65) rotate(-3deg);
+    opacity: 0.85;
+  }
+
+  80% {
+    transform: translate(60px, -120px) scale(0.4) rotate(6deg);
+    opacity: 0.55;
+  }
+
+  100% {
+    transform: translate(120px, -220px) scale(0.1) rotate(8deg);
+    opacity: 0;
+  }
+}
+
+.drifting-envelope.animate-drift {
+  animation: letterFloatAway 5.5s cubic-bezier(0.35, 0.1, 0.25, 1) forwards;
+}
+
+/* ==========================================================================
+   Confirmation State
+   ========================================================================== */
+
+.confirmation-view {
+  text-align: center;
+  max-width: 580px;
+  padding: 40px 30px;
+  background: rgba(251, 249, 244, 0.85);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+  box-shadow: 0 20px 50px rgba(25, 45, 60, 0.14);
+  animation: fadeInConfirm 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeInConfirm {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.confirm-stamp {
+  margin-bottom: 18px;
+}
+
+.confirm-anchor-img {
+  width: 64px;
+  height: auto;
+  filter: drop-shadow(0 6px 14px rgba(20, 40, 65, 0.25));
+}
+
+.confirm-title {
+  font-family: var(--font-display);
+  font-size: 2.3rem;
+  font-weight: 400;
+  color: var(--color-ink-primary);
+  margin-bottom: 14px;
+}
+
+.confirm-subtitle {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  line-height: 1.7;
+  color: var(--color-ink-faded);
+  margin-bottom: 34px;
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.primary-pill {
+  background: var(--color-envelope);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.primary-pill:hover {
+  background: var(--color-envelope-dark);
+  color: #fff;
+}
+
+.secondary-pill {
+  background: rgba(255, 255, 255, 0.65);
+  color: var(--color-ink-primary);
+}
+
+/* ==========================================================================
+   Keepsake Polaroid Modal
+   ========================================================================== */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(18, 32, 45, 0.55);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.modal-card {
+  background: #fbf9f4;
+  border-radius: 8px;
+  max-width: 520px;
+  width: 100%;
+  padding: 24px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.modal-title {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: var(--color-ink-primary);
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  font-size: 1.6rem;
+  color: var(--color-ink-faded);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.keepsake-polaroid {
+  background: #ffffff;
+  padding: 16px 16px 24px;
+  border-radius: 4px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border: 1px solid #e7e2d7;
+}
+
+.keepsake-hero-img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 2px;
+  margin-bottom: 16px;
+  filter: contrast(1.05) saturate(0.95);
+}
+
+.keepsake-body {
+  padding: 0 8px;
+}
+
+.ks-recipient {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-style: italic;
+  color: var(--color-ink-faded);
+  margin-bottom: 8px;
+}
+
+.ks-message {
+  font-family: var(--font-handwriting);
+  font-size: 1.45rem;
+  line-height: 1.6;
+  color: var(--color-ink-primary);
+  margin-bottom: 16px;
+  word-break: break-word;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.ks-signoff {
+  font-family: var(--font-handwriting);
+  font-size: 1.35rem;
+  color: var(--color-ink-primary);
+  text-align: right;
+  margin-bottom: 14px;
+}
+
+.ks-footer {
+  border-top: 1px solid #efeae0;
+  padding-top: 8px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.ks-date {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: rgba(90, 115, 135, 0.7);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.modal-footer {
+  margin-top: 20px;
+  text-align: right;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .letter-card {
+    padding: 30px 22px;
+  }
+
+  .letter-whisper-title .main-heading {
+    font-size: 1.7rem;
+  }
+
+  .postmark-seal {
+    transform: scale(0.85) rotate(-4deg);
+  }
+
+  .top-nav {
+    padding: 16px 20px;
+  }
+}

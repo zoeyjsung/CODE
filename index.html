@@ -1,16 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bouncing Star p5.js</title>
-    <link rel="stylesheet" href="style.css" />
-    <!-- p5.js CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
-  </head>
-  <body>
-    <main></main>
-    <script src="sketch.js"></script>
-  </body>
-</html>
 
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Letters to the Sea • Words Out at Sea</title>
+
+  <!-- Google Fonts: Cormorant Garamond, Italiana, Caveat, DM Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:ital,wght@0,300;0,400;1,300&family=Italiana&family=Lora:ital,wght@0,400;0,500;1,400&display=swap"
+    rel="stylesheet">
+
+  <!-- Canvas Confetti / html2canvas (optional keepsakes) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <!-- Grain & Film Overlay -->
+  <div class="noise-overlay"></div>
+
+  <!-- Top Bar / Audio Controller -->
+  <header class="top-nav">
+    <div class="audio-toggle-container">
+      <button id="soundToggleBtn" class="pill-btn sound-btn" aria-label="Toggle Ocean Music">
+        <svg class="sound-icon icon-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M11 5L6 9H2v6h4l5 4V5z" />
+          <path d="M23 9l-6 6m0-6l6 6" />
+        </svg>
+        <svg class="sound-icon icon-waves hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="1.6">
+          <path d="M11 5L6 9H2v6h4l5 4V5z" />
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+        </svg>
+        <span id="soundLabel">play music</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Audio Player (High-quality local Mermaid Grotto ocean ambience) -->
+  <audio id="ambientMusicPlayer" src="assets/grotto_ambience.mp3" loop preload="auto"></audio>
+
+  <!-- Interactive Ocean Canvas for Shimmer & Waves -->
+  <canvas id="oceanCanvas" class="ocean-backdrop"></canvas>
+
+  <!-- Writing Haven Container -->
+  <main class="scene-container">
+
+    <!-- WRITING DESK VIEW -->
+    <section id="writingDesk" class="writing-desk active">
+
+      <!-- Physical Stationery Card (Inspired by Inspo 1 & 4) -->
+      <div id="letterPaper" class="letter-card">
+
+        <!-- Letter Header with Anchor Wax Seal -->
+        <div class="letter-header">
+          <div class="letter-whisper-title">
+            <h1 class="main-heading">Letters to the Sea</h1>
+          </div>
+
+          <div class="anchor-wax-seal-wrapper">
+            <img src="assets/anchor_seal_transparent.png" alt="Sealed Anchor Wax Stamp" class="anchor-wax-stamp-img" />
+          </div>
+        </div>
+
+        <!-- Inputs / Writing Form -->
+        <div class="letter-form">
+          <!-- "To:" Field -->
+          <div class="input-line to-field-group">
+            <label for="recipientInput" class="field-label">To:</label>
+            <input type="text" id="recipientInput" class="handwritten-input to-input"
+              placeholder="the sea, a past self, someone you miss, or leave empty..." maxlength="80"
+              autocomplete="off" />
+          </div>
+
+          <!-- Main Writing Area -->
+          <div class="message-field-group">
+            <textarea id="messageInput" class="handwritten-textarea"
+              placeholder="Write what you couldn't say, thoughts you want to let go of, confessions, wishes, or memories. The ocean will hold them safely..."
+              rows="8"></textarea>
+            <div class="paper-lines-background" aria-hidden="true"></div>
+          </div>
+
+          <!-- "Love / Sign-off" Field -->
+          <div class="signoff-group">
+            <div class="signoff-prefix-wrapper">
+              <select id="signoffPrefix" class="signoff-select">
+                <option value="Love,">Love,</option>
+                <option value="Yours,">Yours,</option>
+                <option value="Always,">Always,</option>
+                <option value="Sincerely,">Sincerely,</option>
+                <option value="From,">From,</option>
+                <option value="">(none)</option>
+              </select>
+            </div>
+            <input type="text" id="senderInput" class="handwritten-input sender-input"
+              placeholder="anonymous or your name" maxlength="60" autocomplete="off" />
+          </div>
+        </div>
+
+        <!-- Letter Footer & Actions -->
+        <div class="letter-actions">
+          <div class="word-counter" id="wordCountNotice">
+            <span id="charCount">0</span> words into the tide
+          </div>
+          <button id="sendToSeaBtn" class="send-ocean-btn" type="button">
+            <span class="btn-text">Send to Sea</span>
+            <span class="btn-wave-symbol">~ 🌊 ~</span>
+          </button>
+        </div>
+
+        <!-- Decorative paper corner folds -->
+        <div class="deckle-edge edge-bottom"></div>
+      </div>
+
+    </section>
+
+    <!-- FOLDED ENVELOPE / DRIFTING OBJECT (Hidden until click) -->
+    <div id="seaEnvelope" class="drifting-envelope hidden" aria-hidden="true">
+      <div class="envelope-outer">
+        <div class="envelope-flap"></div>
+        <div class="envelope-pocket">
+          <div class="folded-letter-inside"></div>
+        </div>
+        <div class="envelope-wax-seal">
+          <img src="assets/anchor_seal_transparent.png" alt="Anchor Wax Seal" class="envelope-seal-img" />
+        </div>
+      </div>
+      <div class="envelope-water-ripple"></div>
+    </div>
+
+    <!-- PEACEFUL CONFIRMATION VIEW -->
+    <section id="confirmationDesk" class="confirmation-view hidden">
+      <div class="confirmation-content">
+        <div class="confirmation-stamp">
+          <img src="assets/anchor_seal_transparent.png" alt="Anchor Wax Seal" class="confirm-anchor-img" />
+        </div>
+        <h2 class="confirm-title">Your words are out at sea now.</h2>
+        <p class="confirm-subtitle">
+          Carried by the gentle currents, held safely by the quiet deep.<br>
+          You are free to let them go.
+        </p>
+
+        <!-- Sent Letter Replica Keepsake Modal Button -->
+        <div class="confirm-actions">
+          <button id="writeAnotherBtn" class="pill-btn primary-pill">
+            Write another letter
+          </button>
+          <button id="saveKeepsakeBtn" class="pill-btn secondary-pill">
+            Save a quiet keepsake
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Keepsake Modal Preview -->
+  <div id="keepsakeModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span class="modal-title">A Keepsake for the Shore</span>
+        <button id="closeModalBtn" class="modal-close-btn">&times;</button>
+      </div>
+      <div id="keepsakeRenderArea" class="keepsake-polaroid">
+        <div class="keepsake-image-strip">
+          <img src="assets/inspo_0.png" alt="Sparkling Ocean Tide" class="keepsake-hero-img">
+        </div>
+        <div class="keepsake-body">
+          <div class="ks-recipient" id="ksToText">To: The Deep Ocean</div>
+          <div class="ks-message" id="ksMessageText">Your letter message will appear here in quiet beauty.</div>
+          <div class="ks-signoff" id="ksSignoffText">Love, Anonymous</div>
+          <div class="ks-footer">
+            <span class="ks-date" id="ksDateText">Nov 02, 2026</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="downloadImageBtn" class="pill-btn primary-pill">Download Postcard (.png)</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="sketch.js"></script>
+</body>
+
+</html>
