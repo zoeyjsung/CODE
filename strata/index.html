@@ -75,7 +75,7 @@ main{position:relative;flex:1 1 auto;min-height:0}
 .jr{height:560%}
 .stick{position:sticky;top:0;height:calc(100% / 5.6);overflow:hidden}
 #rock,#film{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover}
-#film{opacity:0;filter:contrast(1.08) saturate(.85)}
+#film{opacity:0;filter:contrast(1.08) saturate(.85);background:#05070b}
 .shade{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,transparent 28%,rgba(0,0,0,.86) 100%);pointer-events:none}
 #oblack{position:absolute;inset:0;background:#000;pointer-events:none}
 #enterwrap{position:absolute;left:0;right:0;bottom:12%;display:flex;justify-content:center;opacity:0}
@@ -249,7 +249,7 @@ details[open] summary::after{content:"\2212"}
     <section class="view" id="v-origin" aria-label="Opening">
       <div class="jr"><div class="stick" id="stick">
         <canvas id="rock"></canvas>
-        <video id="film" muted playsinline preload="auto" poster="film/storm.jpg"><source src="film/storm.mp4" type="video/mp4"></video>
+        <canvas id="film"></canvas>
         <div class="shade"></div><div id="oblack"></div>
         <div id="enterwrap"><button class="btn go" type="button" id="enter">Enter</button></div>
         <div class="hint t" id="hint"><span>Scroll</span><i></i></div>
@@ -679,8 +679,20 @@ function initRock(){
   R.size();addEventListener('resize',R.size);
   $('stick').addEventListener('pointermove',e=>{const r=cv.getBoundingClientRect();R.tx=(e.clientX-r.left)/r.width*2-1;R.ty=-((e.clientY-r.top)/r.height*2-1);R.moved=performance.now();});
 }
-const film=$('film');
-let filmOK=true;film.addEventListener('error',()=>{filmOK=false;},true);
+/* storm film as a frame sequence: scroll picks the frame, so it works in every browser */
+const film=$('film'),fctx=film.getContext('2d'),FN=150,frames=new Array(FN);let fLoaded=0,fStarted=false,fLast=-1;
+function loadFrames(){if(fStarted)return;fStarted=true;
+  const order=[];for(let step=16;step>=1;step=step>>1)for(let i=0;i<FN;i+=step)if(!order.includes(i))order.push(i);
+  let q=0;const next=()=>{if(q>=order.length)return;const i=order[q++],im=new Image();im.decoding='async';
+    im.onload=()=>{frames[i]=im;fLoaded++;if(fLast<0||Math.abs(i-fWant)<Math.abs(fLast-fWant))fLast=-2;next();};im.onerror=next;im.src='film/f/'+String(i+1).padStart(3,'0')+'.jpg';};
+  for(let k=0;k<6;k++)next();}
+let fWant=0;
+function drawFilm(i){fWant=i;let best=-1,bd=1e9;for(let k=0;k<FN;k++)if(frames[k]){const d=Math.abs(k-i);if(d<bd){bd=d;best=k;}}if(best<0||best===fLast)return;fLast=best;
+  const im=frames[best],W=film.clientWidth,H=film.clientHeight,dpr=Math.min(devicePixelRatio||1,2);if(!W||!H)return;
+  if(film.width!==Math.round(W*dpr)||film.height!==Math.round(H*dpr)){film.width=Math.round(W*dpr);film.height=Math.round(H*dpr);}
+  const sc=Math.max(film.width/im.naturalWidth,film.height/im.naturalHeight),w=im.naturalWidth*sc,h=im.naturalHeight*sc;
+  fctx.drawImage(im,(film.width-w)/2,(film.height-h)/2,w,h);}
+addEventListener('resize',()=>{fLast=-1;});
 const sc=$('v-origin');
 sc.addEventListener('scroll',()=>{OP=sc.scrollTop/Math.max(1,sc.scrollHeight-sc.clientHeight);},{passive:true});
 let lastSnd=0;
@@ -696,14 +708,14 @@ function originFrame(now){
     R.mesh.rotation.z=a*.9;R.cam.position.set(R.mx*.35+a*.6,-.5+R.my*.2-a*.5,6.7-intro*.3-a*4.3);R.cam.lookAt(a*.2,-.15+a*.1,0);
     R.renderer.render(R.scene,R.cam);}
   const fo=smooth(.32,.42,p)*(1-smooth(.92,1,p)*.5);film.style.opacity=fo;
-  if(fo>0&&filmOK&&film.readyState>=1&&isFinite(film.duration)){const tt=clamp((p-.38)/(.9-.38),0,1)*(film.duration-.05);if(Math.abs(film.currentTime-tt)>.03&&!film.seeking)film.currentTime=tt;}
+  if(fo>0||p>.25)drawFilm(Math.round(clamp((p-.38)/(.9-.38),0,1)*(FN-1)));
   /* sound follows the scroll: the score opens up, the storm rises */
   if(now-lastSnd>120){lastSnd=now;AU.open(smooth(0,.9,p));AU.wind(smooth(.3,.9,p)*.9,500+p*500);}
   const ew=smooth(.86,.93,p);$('enterwrap').style.opacity=ew;$('enterwrap').style.pointerEvents=ew>.5?'auto':'none';
   $('hint').style.opacity=(1-smooth(.01,.05,p))*intro;$('skip').style.opacity=1-smooth(.82,.88,p);$('prog').style.width=(p*100)+'%';
   oraf=requestAnimationFrame(originFrame);
 }
-function startOrigin(){initRock();if(R&&!R.dead)R.size();try{film.load();}catch(e){}
+function startOrigin(){initRock();if(R&&!R.dead)R.size();fLast=-1;setTimeout(loadFrames,300);
   if(!S.seen)setTimeout(()=>{S.seen=true;},reduce?0:400);
   if(!oraf)oraf=requestAnimationFrame(originFrame);}
 $('skip').addEventListener('click',()=>{S.seen=true;go('plan');});
