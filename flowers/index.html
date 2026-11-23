@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mille Fleurs</title>
+
+  <!-- Google Fonts: hand-written look -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Caveat+Brush&display=swap"
+        rel="stylesheet" />
+
+  <!-- Our styles -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- p5.js canvas goes here -->
+  <div id="canvas-container"></div>
+
+  <!-- ─── UI LAYER ──────────────────────────────────────── -->
+  <div id="ui">
+
+    <!-- Garden-view buttons -->
+    <div class="garden-buttons hidden" id="garden-btns">
+      <button class="btn" onclick="openArchiveView()">flower archive</button>
+      <button class="btn" onclick="enterDrawView()">draw a flower</button>
+      <button class="btn" onclick="enterBouquetSelect()">make a bouquet</button>
+    </div>
+
+    <!-- "Click to plant" banner -->
+    <div id="plant-banner">click anywhere in the meadow to plant your flower</div>
+
+    <!-- Bouquet selection info -->
+    <div id="bouquet-info">
+      <span id="bouquet-count">0</span> / 7 flowers picked
+      <br/>
+      <button class="btn" onclick="finishBouquetSelect()" style="margin-top:6px;">wrap it</button>
+      &nbsp;&nbsp;
+      <button class="btn" onclick="cancelBouquetSelect()" style="margin-top:6px;">cancel</button>
+    </div>
+
+    <!-- ─── Draw panel ────────────────────────────────── -->
+    <div id="draw-panel">
+      <div id="draw-canvas-wrap">
+        <canvas id="paint-canvas" width="400" height="400"></canvas>
+      </div>
+      <div class="draw-toolbar">
+        <div class="swatches" id="swatches">
+          <!-- filled by sketch.js -->
+        </div>
+        <div class="brush-sizes" id="brush-sizes">
+          <!-- filled by sketch.js -->
+        </div>
+      </div>
+      <div style="display:flex; gap:18px;">
+        <button class="btn-dark" onclick="clearDrawing()">clear</button>
+        <button class="btn-dark" onclick="plantFlower()">plant it</button>
+      </div>
+    </div>
+
+    <!-- ─── Archive / Herbarium Gallery ────────────────── -->
+    <div id="archive-panel" style="display:none; position:fixed; inset:0; z-index:35; background:rgba(18, 28, 20, 0.94); backdrop-filter:blur(6px); flex-direction:column; align-items:center; padding:32px 20px 24px; overflow-y:auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; width:100%; max-width:980px; margin-bottom:20px;">
+        <h2 style="font-family:'Caveat Brush', cursive; font-size:38px; color:#F7F2E3; letter-spacing:1px; margin:0;">the flower archive</h2>
+        <button class="btn" onclick="closeArchiveView()" style="font-size:24px;">back to garden ✕</button>
+      </div>
+      <p style="color:#C8D96A; font-size:22px; margin-bottom:24px; text-align:center;">a framed living record of every flower planted in the meadow</p>
+      
+      <!-- Grid of framed specimens -->
+      <div id="archive-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:24px; width:100%; max-width:980px; padding-bottom:40px;">
+        <!-- Filled dynamically by sketch.js -->
+      </div>
+    </div>
+
+    <!-- ─── Name Input Modal (Pretty storybook dialog) ─── -->
+    <div id="name-modal" style="display:none; position:fixed; inset:0; z-index:40; justify-content:center; align-items:center; background:rgba(0,0,0,0.45); backdrop-filter:blur(2px);">
+      <div id="name-card" style="background:#F7F2E3; color:#1E3A6B; padding:32px 36px; border-radius:8px; text-align:center; max-width:380px; width:88%; box-shadow:0 12px 36px rgba(0,0,0,0.35);">
+        <h3 style="font-family:'Caveat Brush', cursive; font-size:32px; margin-bottom:8px; font-weight:normal; letter-spacing:0.5px;">who grew this flower?</h3>
+        <p style="font-size:20px; color:#5E8C4A; margin-bottom:16px;">enter your name before planting it in the meadow</p>
+        <input type="text" id="name-input" placeholder="your name or moniker..." style="width:100%; padding:10px 14px; font-family:'Caveat', cursive; font-size:22px; color:#1E3A6B; border:1px solid #C9A7E0; border-radius:6px; background:#fff; text-align:center; outline:none; margin-bottom:20px;" onkeydown="if(event.key==='Enter') confirmPlant()" />
+        <div style="display:flex; gap:20px; justify-content:center;">
+          <button class="btn-dark" onclick="confirmPlant()" style="font-size:24px;">plant in meadow</button>
+          <button class="btn-dark" onclick="cancelPlant()" style="font-size:24px; opacity:0.75;">back</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Bouquet / wrap panel ──────────────────────── -->
+    <div id="bouquet-panel">
+      <div id="bouquet-card">
+        <canvas id="bouquet-preview" width="400" height="500"></canvas>
+        <label>to
+          <input type="text" id="bq-to" placeholder="a name…" />
+        </label>
+        <label>message
+          <textarea id="bq-msg" placeholder="write something…"></textarea>
+        </label>
+        <label>from
+          <input type="text" id="bq-from" placeholder="your name…" />
+        </label>
+        <div style="margin-top:10px; display:flex; gap:18px; justify-content:center;">
+          <button class="btn-dark" onclick="sendBouquet()">send</button>
+          <button class="btn-dark" onclick="closeBouquetPanel()">cancel</button>
+        </div>
+        <div id="link-display">
+          <p style="font-size:18px; margin-bottom:6px;">copy this link and send it 💐</p>
+          <input type="text" id="bq-link" readonly onclick="this.select()" />
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Receive panel ─────────────────────────────── -->
+    <div id="receive-panel">
+      <div id="receive-card">
+        <canvas id="receive-preview" width="400" height="500"></canvas>
+        <div class="msg-to" id="recv-to"></div>
+        <div class="msg-body" id="recv-msg"></div>
+        <div class="msg-from" id="recv-from"></div>
+        <button class="btn-dark" onclick="visitGarden()" style="margin-top:16px;">
+          visit the garden
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /ui -->
+
+  <!-- ─── SCRIPTS (order matters) ───────────────────────── -->
+  <!-- p5.js from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.9.4/lib/p5.min.js"></script>
+
+  <!-- Firebase compat from CDN (no Auth, no Storage) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+  <!-- Sound effects & ambient music -->
+  <script src="sounds.js"></script>
+
+  <!-- Our Firebase helpers -->
+  <script src="firebase.js"></script>
+
+  <!-- Main p5 sketch + all view logic -->
+  <script src="sketch.js"></script>
+</body>
+</html>

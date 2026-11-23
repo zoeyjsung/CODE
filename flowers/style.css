@@ -1,0 +1,281 @@
+/* ─── style.css ──────────────────────────────────────────── */
+/* Dreamy, painterly, storybook – not an app.                */
+/* ────────────────────────────────────────────────────────── */
+
+/* --- Reset & base ---------------------------------------- */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;              /* p5 canvas fills viewport */
+  background: #000;
+  font-family: 'Caveat', cursive;
+  color: #F7F2E3;               /* paper cream              */
+}
+
+/* The p5 canvas lives inside #canvas-container */
+#canvas-container {
+  position: fixed; inset: 0;
+  z-index: 0;
+}
+#canvas-container canvas { display: block; }
+
+/* --- Overlay UI layer (sits above the canvas) ------------ */
+#ui {
+  position: fixed; inset: 0;
+  z-index: 10;
+  pointer-events: none;         /* let clicks fall through   */
+}
+#ui * { pointer-events: auto; } /* but UI elements catch them */
+
+/* --- Garden buttons (bottom-right corner) ---------------- */
+.garden-buttons {
+  position: fixed;
+  bottom: 32px; right: 32px;
+  display: flex; gap: 20px;
+  z-index: 20;
+}
+
+/* Handwritten-word buttons -------------------------------- */
+.btn {
+  background: none; border: none;
+  font-family: 'Caveat', cursive;
+  font-size: 22px;
+  color: #F7F2E3;
+  cursor: pointer;
+  padding: 4px 2px;
+  position: relative;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  transition: opacity 0.3s;
+}
+/* Hand-drawn underline on hover */
+.btn::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: 0;
+  width: 100%; height: 2px;
+  background: #F7F2E3;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+  border-radius: 2px;
+}
+.btn:hover::after { transform: scaleX(1); }
+
+/* --- Draw-view panel ------------------------------------- */
+#draw-panel {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 30;
+  display: none;                   /* shown via JS            */
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+#draw-canvas-wrap {
+  width: 400px; height: 400px;
+  background: #F7F2E3;
+  border-radius: 4px;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.25);
+  position: relative;
+  overflow: hidden;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+#paint-canvas {
+  width: 400px;
+  height: 400px;
+  display: block;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+/* Color swatches row */
+.swatches {
+  display: flex; gap: 10px;
+  align-items: center;
+}
+.swatch {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.swatch:hover { transform: scale(1.15); }
+.swatch.active { border-color: #F7F2E3; }
+
+/* Brush-size toggles */
+.brush-sizes { display: flex; gap: 10px; align-items: center; }
+.brush-dot {
+  border-radius: 50%;
+  background: #F7F2E3;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+.brush-dot.active { opacity: 1; }
+
+.draw-toolbar {
+  display: flex; gap: 16px; align-items: center;
+}
+
+/* --- Bouquet view overlay -------------------------------- */
+#bouquet-panel {
+  position: fixed; inset: 0;
+  z-index: 30;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0,0,0,0.55);
+}
+
+#bouquet-card {
+  background: #F7F2E3;
+  color: #1E3A6B;
+  padding: 32px;
+  border-radius: 4px;
+  max-width: 520px;
+  width: 90%;
+  text-align: center;
+  font-family: 'Caveat', cursive;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+}
+
+#bouquet-card input,
+#bouquet-card textarea {
+  width: 100%;
+  margin: 6px 0 12px;
+  padding: 8px 10px;
+  border: 1px solid #C9A7E0;
+  border-radius: 3px;
+  font-family: 'Caveat', cursive;
+  font-size: 18px;
+  color: #1E3A6B;
+  background: #fff;
+  outline: none;
+}
+#bouquet-card textarea { resize: vertical; min-height: 60px; }
+
+#bouquet-card label {
+  font-size: 20px;
+  display: block;
+  text-align: left;
+}
+
+.btn-dark {
+  background: none; border: none;
+  font-family: 'Caveat', cursive;
+  font-size: 22px;
+  color: #1E3A6B;
+  cursor: pointer;
+  padding: 6px 4px;
+  position: relative;
+}
+.btn-dark::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: 0;
+  width: 100%; height: 2px;
+  background: #1E3A6B;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+  border-radius: 2px;
+}
+.btn-dark:hover::after { transform: scaleX(1); }
+
+/* --- Receive view ---------------------------------------- */
+#receive-panel {
+  position: fixed; inset: 0;
+  z-index: 30;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  background: #000;
+}
+
+#receive-card {
+  background: #F7F2E3;
+  color: #1E3A6B;
+  padding: 36px;
+  border-radius: 4px;
+  max-width: 540px;
+  width: 92%;
+  text-align: center;
+  font-family: 'Caveat', cursive;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+}
+
+#receive-card .msg-to {
+  font-family: 'Caveat Brush', cursive;
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+#receive-card .msg-body {
+  font-size: 22px;
+  line-height: 1.5;
+  margin: 16px 0;
+  white-space: pre-wrap;
+}
+#receive-card .msg-from {
+  font-size: 20px;
+  text-align: right;
+  margin-top: 12px;
+  font-style: italic;
+}
+
+/* --- Link display ---------------------------------------- */
+#link-display {
+  display: none;
+  margin-top: 14px;
+  text-align: center;
+}
+#link-display input {
+  width: 100%;
+  padding: 8px 10px;
+  font-family: 'Caveat', cursive;
+  font-size: 16px;
+  color: #1E3A6B;
+  border: 1px solid #C9A7E0;
+  border-radius: 3px;
+  background: #fff;
+  text-align: center;
+}
+
+/* --- Planting instruction banner ------------------------- */
+#plant-banner {
+  position: fixed;
+  bottom: 40px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 25;
+  display: none;
+  font-family: 'Caveat', cursive;
+  font-size: 24px;
+  color: #F7F2E3;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+  text-align: center;
+}
+
+/* --- Bouquet selection info ------------------------------ */
+#bouquet-info {
+  position: fixed;
+  bottom: 40px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 25;
+  display: none;
+  font-family: 'Caveat', cursive;
+  font-size: 22px;
+  color: #F7F2E3;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+  text-align: center;
+}
+
+/* --- Utility --------------------------------------------- */
+.hidden { display: none !important; }
+
+/* Fade helper (used by JS) */
+.fade { transition: opacity 0.8s ease; }
